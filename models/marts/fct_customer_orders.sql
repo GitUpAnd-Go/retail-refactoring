@@ -1,27 +1,38 @@
-WITH paid_orders as (select Orders.ID as order_id,
-        Orders.USER_ID    as customer_id,
-        Orders.ORDER_DATE AS order_placed_at,
+WITH 
+    paid_orders as 
+    (
+        select Orders.ID as order_id,
+            Orders.USER_ID    as customer_id,
+            Orders.ORDER_DATE AS order_placed_at,
             Orders.STATUS AS order_status,
-        p.total_amount_paid,
-        p.payment_finalized_date,
-        C.FIRST_NAME    as customer_first_name,
+            p.total_amount_paid,
+            p.payment_finalized_date,
+            C.FIRST_NAME    as customer_first_name,
             C.LAST_NAME as customer_last_name
-    FROM retail.raw.orders as Orders
-    left join (select ORDERID as order_id, max(CREATED) as payment_finalized_date, sum(AMOUNT) / 100.0 as total_amount_paid
-from retail.raw.payments
-where STATUS <> 'fail'
-group by 1) p ON orders.ID = p.order_id
-left join retail.raw.customers C on orders.USER_ID = C.ID ),
+        FROM retail.raw.orders as Orders
+    left join 
+        (
+            select ORDERID as order_id, max(CREATED) as payment_finalized_date, sum(AMOUNT) / 100.0 as total_amount_paid
+            from retail.raw.payments
+            where STATUS <> 'fail'
+            group by 1
+        ) p 
+    ON orders.ID = p.order_id
+    left join retail.raw.customers C 
+    on orders.USER_ID = C.ID 
+    ),
 
-customer_orders 
-    as (select C.ID as customer_id
+    customer_orders as 
+    (
+        select C.ID as customer_id
         , min(ORDER_DATE) as first_order_date
         , max(ORDER_DATE) as most_recent_order_date
         , count(ORDERS.ID) AS number_of_orders
-    from retail.raw.customers C 
-    left join retail.raw.orders as Orders
-    on orders.USER_ID = C.ID 
-    group by 1)
+        from retail.raw.customers C 
+        left join retail.raw.orders as Orders
+        on orders.USER_ID = C.ID 
+        group by 1
+        )
 
 select
     p.*,
