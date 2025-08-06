@@ -1,0 +1,8 @@
+version : 2
+
+sources:
+  - name: employees_tab
+    database: retail
+    schema: raw
+    tables:
+      - name : employees
